@@ -167,7 +167,7 @@ class AttendanceListScreenState extends State<AttendanceListScreen> {
                                   children: <Widget>[
                                     Text(record.employeeName),
                                     Text(
-                                      '${record.employeeCode} • ${record.designation}',
+                                      '${record.employeeCode} - ${record.designation}',
                                       style:
                                           Theme.of(context).textTheme.bodySmall,
                                     ),
