@@ -19,14 +19,14 @@ class _AttendanceAppState extends State<AttendanceApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'BSZone Admin',
+      title: 'BSZone Coconut ERP',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFC65D2E),
+          seedColor: const Color(0xFF1F6A48),
           brightness: Brightness.light,
         ),
-        scaffoldBackgroundColor: const Color(0xFFF6F1E8),
+        scaffoldBackgroundColor: const Color(0xFFF3F7F2),
         useMaterial3: true,
       ),
       home: _session == null

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../models/auth_session.dart';
-import '../models/employee.dart';
 import '../services/api_service.dart';
-import 'attendance_form_screen.dart';
-import 'attendance_list_screen.dart';
-import 'employee_form_screen.dart';
-import 'employees_list_screen.dart';
+import '../services/offline_queue_service.dart';
+import 'dashboard_screen.dart';
+import 'reports_screen.dart';
+import 'worklog_entry_screen.dart';
 
 class WorkspaceShell extends StatefulWidget {
   const WorkspaceShell({
@@ -25,59 +24,67 @@ class WorkspaceShell extends StatefulWidget {
 }
 
 class _WorkspaceShellState extends State<WorkspaceShell> {
-  final GlobalKey<EmployeesListScreenState> _employeesKey =
-      GlobalKey<EmployeesListScreenState>();
-  final GlobalKey<AttendanceListScreenState> _attendanceKey =
-      GlobalKey<AttendanceListScreenState>();
   int _selectedIndex = 0;
+  int _queuedCount = 0;
 
-  Future<void> _openEmployeeForm([Employee? employee]) async {
-    final refreshed = await Navigator.of(context).push<bool>(
-      MaterialPageRoute<bool>(
-        builder: (context) => EmployeeFormScreen(
-          apiService: widget.apiService,
-          token: widget.session.token,
-          employee: employee,
-        ),
-      ),
-    );
-
-    if (refreshed == true) {
-      _employeesKey.currentState?.reload();
-    }
+  @override
+  void initState() {
+    super.initState();
+    _loadQueuedCount();
   }
 
-  Future<void> _openAttendanceForm() async {
-    final refreshed = await Navigator.of(context).push<bool>(
-      MaterialPageRoute<bool>(
-        builder: (context) => AttendanceFormScreen(
-          apiService: widget.apiService,
-          token: widget.session.token,
+  Future<void> _loadQueuedCount() async {
+    final queued = await OfflineQueueService.instance.getQueuedCount();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _queuedCount = queued;
+    });
+  }
+
+  Future<void> _syncOfflineQueue() async {
+    await OfflineQueueService.instance.syncQueuedWorkLogs(
+      apiService: widget.apiService,
+      token: widget.session.token,
+    );
+    await _loadQueuedCount();
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _queuedCount == 0
+              ? 'Offline work logs are synced'
+              : 'Some work logs are still waiting for network',
         ),
       ),
     );
-
-    if (refreshed == true) {
-      _attendanceKey.currentState?.reload();
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final titles = <String>['Employee List', 'Attendance List'];
+    final titles = <String>[
+      'Dashboard',
+      'Add Work Log',
+      'Reports',
+    ];
 
     return Scaffold(
       appBar: AppBar(
         title: Text(titles[_selectedIndex]),
         actions: <Widget>[
           IconButton(
-            tooltip: _selectedIndex == 0 ? 'Add employee' : 'Mark attendance',
-            onPressed: () => _selectedIndex == 0
-                ? _openEmployeeForm()
-                : _openAttendanceForm(),
-            icon: Icon(_selectedIndex == 0
-                ? Icons.person_add_alt_1_rounded
-                : Icons.playlist_add_check_circle_rounded),
+            tooltip: 'Sync offline work logs',
+            onPressed: _syncOfflineQueue,
+            icon: Badge.count(
+              isLabelVisible: _queuedCount > 0,
+              count: _queuedCount,
+              child: const Icon(Icons.sync_rounded),
+            ),
           ),
           IconButton(
             tooltip: 'Log out',
@@ -97,7 +104,7 @@ class _WorkspaceShellState extends State<WorkspaceShell> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      'BSZone Admin',
+                      'BSZone Coconut ERP',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -108,7 +115,7 @@ class _WorkspaceShellState extends State<WorkspaceShell> {
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     Text(
-                      widget.session.username,
+                      '${widget.session.username} • ${widget.session.role}',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: const Color(0xFF5A6472),
                           ),
@@ -117,8 +124,8 @@ class _WorkspaceShellState extends State<WorkspaceShell> {
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.badge_outlined),
-                title: const Text('Employees'),
+                leading: const Icon(Icons.dashboard_outlined),
+                title: const Text('Dashboard'),
                 selected: _selectedIndex == 0,
                 onTap: () {
                   Navigator.of(context).pop();
@@ -128,13 +135,24 @@ class _WorkspaceShellState extends State<WorkspaceShell> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.fact_check_outlined),
-                title: const Text('Attendance'),
+                leading: const Icon(Icons.agriculture_outlined),
+                title: const Text('Work Log'),
                 selected: _selectedIndex == 1,
                 onTap: () {
                   Navigator.of(context).pop();
                   setState(() {
                     _selectedIndex = 1;
+                  });
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.insights_outlined),
+                title: const Text('Reports'),
+                selected: _selectedIndex == 2,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  setState(() {
+                    _selectedIndex = 2;
                   });
                 },
               ),
@@ -154,18 +172,22 @@ class _WorkspaceShellState extends State<WorkspaceShell> {
       body: IndexedStack(
         index: _selectedIndex,
         children: <Widget>[
-          EmployeesListScreen(
-            key: _employeesKey,
+          DashboardScreen(
             apiService: widget.apiService,
             token: widget.session.token,
-            onAddEmployee: _openEmployeeForm,
-            onEditEmployee: _openEmployeeForm,
           ),
-          AttendanceListScreen(
-            key: _attendanceKey,
+          WorkLogEntryScreen(
             apiService: widget.apiService,
             token: widget.session.token,
-            onMarkAttendance: _openAttendanceForm,
+            onQueuedCountChanged: (value) {
+              setState(() {
+                _queuedCount = value;
+              });
+            },
+          ),
+          ReportsScreen(
+            apiService: widget.apiService,
+            token: widget.session.token,
           ),
         ],
       ),
@@ -178,14 +200,19 @@ class _WorkspaceShellState extends State<WorkspaceShell> {
         },
         destinations: const <NavigationDestination>[
           NavigationDestination(
-            icon: Icon(Icons.badge_outlined),
-            selectedIcon: Icon(Icons.badge_rounded),
-            label: 'Employees',
+            icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard_rounded),
+            label: 'Dashboard',
           ),
           NavigationDestination(
-            icon: Icon(Icons.fact_check_outlined),
-            selectedIcon: Icon(Icons.fact_check_rounded),
-            label: 'Attendance',
+            icon: Icon(Icons.agriculture_outlined),
+            selectedIcon: Icon(Icons.agriculture_rounded),
+            label: 'Work Log',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.insights_outlined),
+            selectedIcon: Icon(Icons.insights_rounded),
+            label: 'Reports',
           ),
         ],
       ),

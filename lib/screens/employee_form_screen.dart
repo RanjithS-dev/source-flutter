@@ -93,11 +93,15 @@ class _EmployeeFormScreenState extends State<EmployeeFormScreen> {
       id: widget.employee?.id ?? '',
       employeeCode: _employeeCodeController.text.trim(),
       fullName: _fullNameController.text.trim(),
+      role: widget.employee?.role ?? 'worker',
       department: _departmentController.text.trim(),
       designation: _designationController.text.trim(),
       email: _emailController.text.trim(),
       phoneNumber: _phoneController.text.trim(),
+      dailyWage: widget.employee?.dailyWage ?? 0,
       joinedOn: DateTime.parse(_joinedOnController.text.trim()),
+      isActive: widget.employee?.isActive ?? true,
+      notes: widget.employee?.notes ?? '',
     );
 
     try {

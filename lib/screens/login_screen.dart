@@ -79,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: <Color>[Color(0xFFFFFBF5), Color(0xFFF1E9DC)],
+            colors: <Color>[Color(0xFFF7FBF6), Color(0xFFE8F1E8)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -100,10 +100,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
+                      Image.asset(
+                        'assets/images/business-logo.png',
+                        height: 92,
+                      ),
+                      const SizedBox(height: 12),
                       Text(
-                        'BSZone Admin',
+                        'BSZone Coconut ERP',
                         style: theme.textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w700,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Lease land, assign workers, capture harvest, and review reports from one mobile workspace.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: const Color(0xFF5A6472),
                         ),
                         textAlign: TextAlign.center,
                       ),
