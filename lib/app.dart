@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
 
-import 'screens/dashboard_screen.dart';
+import 'models/auth_session.dart';
+import 'screens/login_screen.dart';
+import 'screens/workspace_shell.dart';
+import 'services/api_service.dart';
 
-class AttendanceApp extends StatelessWidget {
+class AttendanceApp extends StatefulWidget {
   const AttendanceApp({super.key});
+
+  @override
+  State<AttendanceApp> createState() => _AttendanceAppState();
+}
+
+class _AttendanceAppState extends State<AttendanceApp> {
+  final ApiService _apiService = const ApiService();
+  AppSession? _session;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Attendance Platform',
+      title: 'BSZone Admin',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -18,7 +29,24 @@ class AttendanceApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFFF6F1E8),
         useMaterial3: true,
       ),
-      home: const DashboardScreen(),
+      home: _session == null
+          ? LoginScreen(
+              apiService: _apiService,
+              onLoggedIn: (session) {
+                setState(() {
+                  _session = session;
+                });
+              },
+            )
+          : WorkspaceShell(
+              apiService: _apiService,
+              session: _session!,
+              onLogout: () {
+                setState(() {
+                  _session = null;
+                });
+              },
+            ),
     );
   }
 }

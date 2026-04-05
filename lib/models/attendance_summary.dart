@@ -13,10 +13,10 @@ class AttendanceSummary {
 
   factory AttendanceSummary.fromJson(Map<String, dynamic> json) {
     return AttendanceSummary(
-      todayPresent: json['todayPresent'] as int? ?? 0,
-      lateArrivals: json['lateArrivals'] as int? ?? 0,
-      remoteEmployees: json['remoteEmployees'] as int? ?? 0,
-      attendanceRate: json['attendanceRate'] as int? ?? 0,
+      todayPresent: (json['todayPresent'] as num?)?.toInt() ?? 0,
+      lateArrivals: (json['lateArrivals'] as num?)?.toInt() ?? 0,
+      remoteEmployees: (json['remoteEmployees'] as num?)?.toInt() ?? 0,
+      attendanceRate: (json['attendanceRate'] as num?)?.toInt() ?? 0,
     );
   }
 }

@@ -31,15 +31,15 @@ class SummaryCard extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFF5A6472),
-            ),
+                  color: const Color(0xFF5A6472),
+                ),
           ),
           const SizedBox(height: 10),
           Text(
             value,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+                  fontWeight: FontWeight.w700,
+                ),
           ),
         ],
       ),

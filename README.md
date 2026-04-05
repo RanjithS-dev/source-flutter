@@ -10,8 +10,18 @@ Because the Flutter SDK was not installed in this environment, native folders su
 cd flutter
 flutter create .
 flutter pub get
-flutter run --dart-define=API_BASE_URL=http://localhost:4000/api
+flutter run --dart-define=API_BASE_URL=https://source-backend-django-production.up.railway.app/api
 ```
 
-When your Railway backend is live, replace the local URL with your deployed API URL.
+Build an Android APK after native folders are generated:
+
+```bash
+flutter build apk --release --dart-define=API_BASE_URL=https://source-backend-django-production.up.railway.app/api
+```
+
+Expected APK output path:
+
+```text
+flutter/build/app/outputs/flutter-apk/app-release.apk
+```
 "# source-flutter" 
